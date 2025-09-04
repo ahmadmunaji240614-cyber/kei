@@ -1,0 +1,56 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local function createESP(targetPlayer)
+    if targetPlayer == LocalPlayer then return end
+    local char = targetPlayer.Character
+    if not char then return end
+    local head = char:FindFirstChild("Head")
+    if not head then return end
+    local a0 = Instance.new("Attachment", head)
+    local myHead = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Head")
+    if not myHead then return end
+    local a1 = Instance.new("Attachment", myHead)
+    local beam = Instance.new("Beam")
+    beam.Attachment0 = a0
+    beam.Attachment1 = a1
+    beam.Color = ColorSequence.new(Color3.fromRGB(0,255,0))
+    beam.Width0 = 0.1
+    beam.Width1 = 0.1
+    beam.Transparency = NumberSequence.new(0)
+    beam.FaceCamera = true
+    beam.Parent = head
+    if not head:FindFirstChild("NameBillboard") then
+        local billboard = Instance.new("BillboardGui", head)
+        billboard.Name = "NameBillboard"
+        billboard.Size = UDim2.new(0,100,0,25)
+        billboard.StudsOffset = Vector3.new(0,2,0)
+        billboard.AlwaysOnTop = true
+        local text = Instance.new("TextLabel", billboard)
+        text.Size = UDim2.new(1,0,1,0)
+        text.BackgroundTransparency = 1
+        text.Text = targetPlayer.Name
+        text.TextColor3 = Color3.new(1,1,1)
+        text.TextStrokeTransparency = 0
+        text.TextScaled = true
+        text.Font = Enum.Font.SourceSansBold
+    end
+end
+
+for _, p in ipairs(Players:GetPlayers()) do
+    p.CharacterAdded:Connect(function()
+        task.wait(1)
+        createESP(p)
+    end)
+    if p.Character then
+        createESP(p)
+    end
+end
+
+Players.PlayerAdded:Connect(function(p)
+    p.CharacterAdded:Connect(function()
+        task.wait(1)
+        createESP(p)
+    end)
+end)
