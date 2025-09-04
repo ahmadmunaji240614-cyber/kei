@@ -1,0 +1,126 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 220, 0, 200)
+Frame.Position = UDim2.new(0, 50, 0, 50)
+Frame.BackgroundColor3 = Color3.fromRGB(35,35,35)
+Frame.Active = true
+Frame.Draggable = true
+
+local Title = Instance.new("TextLabel", Frame)
+Title.Size = UDim2.new(1,0,0,30)
+Title.Text = "ESP + Teleport"
+Title.BackgroundColor3 = Color3.fromRGB(60,60,60)
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.TextScaled = true
+
+local EspBtn = Instance.new("TextButton", Frame)
+EspBtn.Size = UDim2.new(1,0,0,40)
+EspBtn.Position = UDim2.new(0,0,0,40)
+EspBtn.Text = "Aktifkan ESP"
+EspBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+EspBtn.TextColor3 = Color3.fromRGB(255,255,255)
+EspBtn.TextScaled = true
+
+local TeleportBox = Instance.new("TextBox", Frame)
+TeleportBox.Size = UDim2.new(1,0,0,40)
+TeleportBox.Position = UDim2.new(0,0,0,90)
+TeleportBox.PlaceholderText = "Nama Player"
+TeleportBox.BackgroundColor3 = Color3.fromRGB(50,50,50)
+TeleportBox.TextColor3 = Color3.fromRGB(255,255,255)
+TeleportBox.TextScaled = true
+
+local TeleBtn = Instance.new("TextButton", Frame)
+TeleBtn.Size = UDim2.new(1,0,0,40)
+TeleBtn.Position = UDim2.new(0,0,0,140)
+TeleBtn.Text = "Teleport"
+TeleBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+TeleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+TeleBtn.TextScaled = true
+
+local function createESP(character, player)
+    local head = character:WaitForChild("Head")
+    if not head:FindFirstChild("Antenna") then
+        local attachment = Instance.new("Attachment", head)
+        attachment.Name = "Antenna"
+        local antenna = Instance.new("Beam")
+        antenna.Name = "Antenna"
+        antenna.Parent = head
+        antenna.FaceCamera = true
+        antenna.Color = ColorSequence.new(Color3.fromRGB(255,0,0))
+        antenna.Width0 = 0.1
+        antenna.Width1 = 0.1
+        local top = Instance.new("Part")
+        top.Size = Vector3.new(0.1,0.1,0.1)
+        top.Anchored = true
+        top.CanCollide = false
+        top.Transparency = 1
+        top.Position = head.Position + Vector3.new(0,15,0)
+        top.Parent = workspace
+        local topAttachment = Instance.new("Attachment", top)
+        antenna.Attachment0 = attachment
+        antenna.Attachment1 = topAttachment
+        RunService.RenderStepped:Connect(function()
+            if head and top then
+                top.Position = head.Position + Vector3.new(0,15,0)
+            end
+        end)
+    end
+    if not head:FindFirstChild("NameTag") then
+        local billboard = Instance.new("BillboardGui", head)
+        billboard.Name = "NameTag"
+        billboard.Size = UDim2.new(0, 100, 0, 50)
+        billboard.StudsOffset = Vector3.new(0, 2, 0)
+        billboard.AlwaysOnTop = true
+        local textLabel = Instance.new("TextLabel", billboard)
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.BackgroundTransparency = 1
+        textLabel.Text = player.Name
+        textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        textLabel.TextScaled = true
+        textLabel.Font = Enum.Font.SourceSansBold
+    end
+end
+
+EspBtn.MouseButton1Click:Connect(function()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            createESP(player.Character, player)
+        end
+        player.CharacterAdded:Connect(function(char)
+            createESP(char, player)
+        end)
+    end
+end)
+
+TeleBtn.MouseButton1Click:Connect(function()
+    local target = Players:FindFirstChild(TeleportBox.Text)
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        LocalPlayer.Character:MoveTo(target.Character.HumanoidRootPart.Position + Vector3.new(0,3,0))
+    end
+end)local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 220, 0, 200)
+Frame.Position = UDim2.new(0, 50, 0, 50)
+Frame.BackgroundColor3 = Color3.fromRGB(35,35,35)
+Frame.Active = true
+Frame.Draggable = true
+
+local Title = Instance.new("TextLabel", Frame)
+Title.Size = UDim2.new(1,0,0,30)
+Title.Text = "ESP + Teleport"
+Title.BackgroundColor3 = Color3.fromRGB(60,60,60)
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.TextScaled = true
+
+local EspBtn = Instance.new("TextButton", Frame)
+EspBtn.Size = UDim2.new(1,0,0,40)
+EspBtn.Position = UDim2.new(0,0,0,40)
+EspBtn.Text = "Aktifkan ESP"
