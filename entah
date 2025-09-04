@@ -1,0 +1,69 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+local r, g, b = 0, 255, 128
+
+local lines = {}
+local names = {}
+
+local function createLine()
+    local line = Drawing.new("Line")
+    line.Color = Color3.fromRGB(r, g, b)
+    line.Thickness = 1
+    line.Visible = true
+    return line
+end
+
+local function createName(name)
+    local text = Drawing.new("Text")
+    text.Text = name
+    text.Size = 14
+    text.Color = Color3.fromRGB(255, 255, 255)
+    text.Center = true
+    text.Outline = true
+    text.Visible = true
+    return text
+end
+
+local function addPlayer(player)
+    if player ~= LocalPlayer then
+        lines[player] = createLine()
+        names[player] = createName(player.Name)
+    end
+end
+
+for _, player in pairs(Players:GetPlayers()) do
+    addPlayer(player)
+end
+
+Players.PlayerAdded:Connect(addPlayer)
+
+RunService.RenderStepped:Connect(function()
+    local camera = workspace.CurrentCamera
+    for player, line in pairs(lines) do
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+            and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+
+            local from = camera:WorldToViewportPoint(LocalPlayer.Character.HumanoidRootPart.Position)
+            local to = camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+
+            line.From = Vector2.new(from.X, from.Y)
+            line.To = Vector2.new(to.X, to.Y)
+
+            local nameText = names[player]
+            nameText.Position = Vector2.new(to.X, to.Y - 20)
+        end
+    end
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    if lines[player] then
+        lines[player]:Remove()
+        lines[player] = nil
+    end
+    if names[player] then
+        names[player]:Remove()
+        names[player] = nil
+    end
+end)
