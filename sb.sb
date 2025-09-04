@@ -1,0 +1,85 @@
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+local gui = Instance.new("ScreenGui", game.CoreGui)
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0,180,0,120)
+frame.Position = UDim2.new(0,50,0,50)
+frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
+frame.Active = true
+frame.Draggable = true
+
+local espBtn = Instance.new("TextButton", frame)
+espBtn.Size = UDim2.new(1,0,0,30)
+espBtn.Text = "ESP ON"
+espBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+espBtn.TextColor3 = Color3.new(1,1,1)
+
+local box = Instance.new("TextBox", frame)
+box.Size = UDim2.new(1,0,0,30)
+box.Position = UDim2.new(0,0,0,40)
+box.PlaceholderText = "Nama Player"
+box.BackgroundColor3 = Color3.fromRGB(60,60,60)
+box.TextColor3 = Color3.new(1,1,1)
+
+local teleBtn = Instance.new("TextButton", frame)
+teleBtn.Size = UDim2.new(1,0,0,30)
+teleBtn.Position = UDim2.new(0,0,0,80)
+teleBtn.Text = "Teleport"
+teleBtn.BackgroundColor3 = Color3.fromRGB(80,80,80)
+teleBtn.TextColor3 = Color3.new(1,1,1)
+
+local function createESP(char, plr)
+    local head = char:WaitForChild("Head")
+    if not head:FindFirstChild("Antenna") then
+        local a0 = Instance.new("Attachment", head)
+        local beam = Instance.new("Beam", head)
+        beam.Attachment0 = a0
+        beam.Color = ColorSequence.new(Color3.new(1,0,0))
+        beam.Width0 = 0.1
+        beam.Width1 = 0.1
+        local top = Instance.new("Part")
+        top.Size = Vector3.new(0.1,0.1,0.1)
+        top.Anchored = true
+        top.CanCollide = false
+        top.Transparency = 1
+        top.Parent = workspace
+        local a1 = Instance.new("Attachment", top)
+        beam.Attachment1 = a1
+        RunService.RenderStepped:Connect(function()
+            if head and top then
+                top.Position = head.Position + Vector3.new(0,15,0)
+            end
+        end)
+    end
+    if not head:FindFirstChild("NameTag") then
+        local billboard = Instance.new("BillboardGui", head)
+        billboard.Name = "NameTag"
+        billboard.Size = UDim2.new(0,100,0,30)
+        billboard.StudsOffset = Vector3.new(0,2,0)
+        billboard.AlwaysOnTop = true
+        local text = Instance.new("TextLabel", billboard)
+        text.Size = UDim2.new(1,0,1,0)
+        text.BackgroundTransparency = 1
+        text.Text = plr.Name
+        text.TextColor3 = Color3.new(1,1,1)
+        text.TextScaled = true
+    end
+end
+
+espBtn.MouseButton1Click:Connect(function()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            createESP(p.Character, p)
+        end
+        p.CharacterAdded:Connect(function(c) createESP(c, p) end)
+    end
+end)
+
+teleBtn.MouseButton1Click:Connect(function()
+    local target = Players:FindFirstChild(box.Text)
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        LocalPlayer.Character:MoveTo(target.Character.HumanoidRootPart.Position + Vector3.new(0,3,0))
+    end
+end)
