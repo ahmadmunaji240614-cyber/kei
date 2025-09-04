@@ -1,0 +1,58 @@
+local Settings={SLineEnabled=true,NameEnabled=true,AimbotEnabled=false,LineColor=Color3.fromRGB(255,0,0)}
+local Players=game:GetService("Players")
+local LocalPlayer=Players.LocalPlayer
+local Camera=workspace.CurrentCamera
+local RunService=game:GetService("RunService")
+local PlayerGui=LocalPlayer:WaitForChild("PlayerGui")
+local ScreenGui=Instance.new("ScreenGui",PlayerGui)
+local ToggleButton=Instance.new("TextButton")
+ToggleButton.Size=UDim2.new(0,100,0,50)
+ToggleButton.Position=UDim2.new(0,10,0,10)
+ToggleButton.Text="Aimbot: OFF"
+ToggleButton.BackgroundColor3=Color3.fromRGB(50,50,50)
+ToggleButton.TextColor3=Color3.new(1,1,1)
+ToggleButton.Parent=ScreenGui
+ToggleButton.MouseButton1Click:Connect(function()
+    Settings.AimbotEnabled=not Settings.AimbotEnabled
+    ToggleButton.Text="Aimbot: "..(Settings.AimbotEnabled and "ON" or "OFF")
+end)
+local function createLine(target)local line=Drawing.new("Line")line.Color=Settings.LineColor line.Thickness=2 line.Visible=true return line end
+local function createNameTag(target)local Billboard=Instance.new("BillboardGui")Billboard.Size=UDim2.new(0,100,0,50)Billboard.Adornee=target:FindFirstChild("HumanoidRootPart")Billboard.AlwaysOnTop=true local NameLabel=Instance.new("TextLabel")NameLabel.Size=UDim2.new(1,0,1,0)NameLabel.BackgroundTransparency=1 NameLabel.TextColor3=Color3.new(1,1,1)NameLabel.Text=target.Name NameLabel.TextScaled=true NameLabel.Parent=Billboard Billboard.Parent=target end
+local Lines={}
+for _,player in pairs(Players:GetPlayers())do
+    if player~=LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart")then
+        if Settings.SLineEnabled then Lines[player]=createLine(player)end
+        if Settings.NameEnabled then createNameTag(player.Character)end
+    end
+end
+RunService.RenderStepped:Connect(function()
+    for player,line in pairs(Lines)do
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart")then
+            local vector,onScreen=Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+            line.From=Vector2.new(Camera.ViewportSize.X/2,Camera.ViewportSize.Y/2)
+            line.To=Vector2.new(vector.X,vector.Y)
+            line.Visible=onScreen
+        else
+            line.Visible=false
+        end
+    end
+end)
+RunService.RenderStepped:Connect(function()
+    if Settings.AimbotEnabled then
+        local closest
+        local shortestDist=math.huge
+        for _,player in pairs(Players:GetPlayers())do
+            if player~=LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart")then
+                local screenPos,onScreen=Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+                if onScreen then
+                    local dist=(Vector2.new(screenPos.X,screenPos.Y)-Vector2.new(Camera.ViewportSize.X/2,Camera.ViewportSize.Y/2)).Magnitude
+                    if dist<shortestDist then
+                        shortestDist=dist
+                        closest=player
+                    end
+                end
+            end
+        end
+        if closest then Camera.CFrame=CFrame.lookAt(Camera.CFrame.Position,closest.Character.HumanoidRootPart.Position)end
+    end
+end)
