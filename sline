@@ -1,0 +1,71 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local function createESP(character, player)
+    local root = character:WaitForChild("HumanoidRootPart")
+
+    if not root:FindFirstChild("ESPBeam") then
+        local attachment0 = Instance.new("Attachment", root)
+
+        local top = Instance.new("Part")
+        top.Size = Vector3.new(0.1,0.1,0.1)
+        top.Anchored = true
+        top.CanCollide = false
+        top.Transparency = 1
+        top.Position = root.Position + Vector3.new(0,10,0)
+        top.Parent = workspace
+
+        local attachment1 = Instance.new("Attachment", top)
+
+        local beam = Instance.new("Beam")
+        beam.Name = "ESPBeam"
+        beam.Attachment0 = attachment0
+        beam.Attachment1 = attachment1
+        beam.FaceCamera = true
+        beam.Color = ColorSequence.new(Color3.fromRGB(0,255,0))
+        beam.Width0 = 0.05
+        beam.Width1 = 0.05
+        beam.Parent = root
+
+        RunService.RenderStepped:Connect(function()
+            if root and top then
+                top.Position = root.Position + Vector3.new(0,10,0)
+            end
+        end)
+    end
+
+    if not root:FindFirstChild("NameTag") then
+        local billboard = Instance.new("BillboardGui", root)
+        billboard.Name = "NameTag"
+        billboard.Size = UDim2.new(0,70,0,15)
+        billboard.Adornee = root
+        billboard.AlwaysOnTop = true
+
+        local text = Instance.new("TextLabel", billboard)
+        text.Size = UDim2.new(1,0,1,0)
+        text.BackgroundTransparency = 1
+        text.TextColor3 = Color3.fromRGB(255,255,255)
+        text.TextScaled = true
+        text.Text = player.Name
+    end
+end
+
+for _,player in pairs(Players:GetPlayers()) do
+    if player ~= LocalPlayer then
+        player.CharacterAdded:Connect(function(char)
+            wait(1)
+            createESP(char, player)
+        end)
+        if player.Character then
+            createESP(player.Character, player)
+        end
+    end
+end
+
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(char)
+        wait(1)
+        createESP(char, player)
+    end)
+end)
